@@ -12,7 +12,7 @@ class Portfolio {
       this.cryptocurrencies.set(name, units);
     }
   }
-
+  
   // Remove a cryptocurrency from the portfolio
   removeCryptocurrency(name, units) {
     const currentQuantity = this.cryptocurrencies.get(name);

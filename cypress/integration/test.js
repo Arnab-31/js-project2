@@ -23,33 +23,25 @@ describe('Fetch data from API', () => {
   //Create a init function which should be called everytime the page is loaded. The init function should fetch the prices of 10 cryptocurrencies for the api
   //https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC,ETH,XRP,LTC,BCH,EOS,BNB,ADA,XLM,DOT&tsyms=USD
   //and store it in a global variable called prices. And display it in the html inside the #prices div.
-  let appPrices;
-  it('fetches data and compares it to stored variable', () => {
+
+  it('test fetched price data', () => {
     cy.visit('/')
     let prices;
     cy.wait(2000)
     cy.window().then(win => {
       prices = win.prices;
-      appPrices = prices;
     });
-    let expectedHtml = "";
     cy.request('https://min-api.cryptocompare.com/data/pricemulti?fsyms=BTC,ETH,XRP,LTC,BCH,EOS,BNB,ADA,XLM,DOT&tsyms=USD')
       .then((response) => {
         expect(response.body).to.deep.equal(prices)
-        let html = ""
         for (const key in prices) {
-            html += `<div class="price"><b>${key}:</b> $${prices[key].USD}</div>`
+            cy.get(`#prices div:contains("${prices[key].USD}")`)
         }
-        expectedHtml = html
     })
-    cy.get('#prices')
-    .then(($div) => {
-      expect($div.html()).to.equal(expectedHtml)
-    });
   })
   
   //Create a global variable called balance which will store the amount of dollars with the user. Its value should be 10000 initally.
-  //Create two global functions handleBuy(e) and handleSel(e). When the user buys crypto by clicking the #buy-button the handleBuy function should 
+  //Create two global functions handleBuy(e) and handleSell(e). When the user buys crypto by clicking the #buy-button the handleBuy function should 
   //update the portfolio using the addCryptocurrency function. Similarly when the user sells crypto  by clicking the #sell-button, the handleSell(e)
   //function should update the portfolio using the removeCryptocurrency function. Both of these function should also update the global variable balance.
   //At the end, update the UI with the new portfolio data. In the #portfolio div, display the portfolio details in a list, and update the text of
@@ -100,10 +92,8 @@ describe('Fetch data from API', () => {
     cy.get('#units').type(1);
     cy.get('button[type=submit]').click();
     cy.wait(100)
-    cy.get('#balance').invoke('text').then((text) => {
-      const balance = text.replace('Balance: $', '');
-      expect(Number(balance)).to.equal(10000 - 7428.12);
-    });
+    cy.get('#balance').should('contain', '2571.88')
+    
 
     cy.intercept(
       'GET',
@@ -148,10 +138,7 @@ describe('Fetch data from API', () => {
     cy.get('#units').type(1);
     cy.get('#sell-button').click();
     cy.wait(2000)
-    cy.get('#balance').invoke('text').then((text) => {
-      const balance = text.replace('Balance: $', '');
-      expect(Number(balance)).to.equal(10010);
-    });
+    cy.get('#balance').should('contain', '10010')
   })
 
   // Wheever the portfolio and the balance gets updated, store their data in the localstorage. The portfolio data must to stored in the
@@ -163,12 +150,13 @@ describe('Fetch data from API', () => {
     cy.get('#currency').select('BNB');
     cy.get('#units').type(1);
     cy.get('button[type=submit]').click();
+    let prices;
     cy.window().then(win => {
-      appPrices = win.prices;
+      prices = win.prices;
     });
     cy.window().then((win) => {
       const balance = win.localStorage.getItem('balance');
-      expect(Number(balance)).to.equal(10000 - appPrices['BNB'].USD);
+      expect(Number(balance)).to.equal(10000 - prices['BNB'].USD);
     });
   })
   

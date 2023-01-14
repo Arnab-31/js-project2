@@ -12,7 +12,7 @@ class Portfolio {
       this.cryptocurrencies.set(name, units);
     }
   }
-
+  
   // Remove a cryptocurrency from the portfolio
   removeCryptocurrency(name, units) {
     const currentQuantity = this.cryptocurrencies.get(name);
@@ -108,6 +108,8 @@ this.currencyDropdown.innerHTML = html;
 function handleBuy(e) {
 e.preventDefault();
 
+//update prices before buying
+this.fetchPrices()
 // Get the selected currency and units to buy
 const currency = this.currencyDropdown.value;
 const units = parseFloat(this.unitsInput.value);
@@ -136,13 +138,19 @@ this.clearForm();
 }
 
 // Handle the sell button click
-function handleSell() {
+async function handleSell() {
+
+//update prices before selling
+await this.fetchPrices()
+this.updatePortfolio();
+
 // Get the selected currency and units to sell
 const currency = this.currencyDropdown.value;
 const units = parseFloat(this.unitsInput.value);
 
 
 // Make sure the cryptocurrency is in the portfolio and there are enough units to sell
+console.log(currency)
 if (!this.portfolio.cryptocurrencies.has(currency) || units > this.portfolio.cryptocurrencies.get(currency)) {
   alert("Invalid sell request.");
   return;
@@ -199,5 +207,6 @@ this.priceInput.value = price;
 }
 
 
+//Do not change the below code
 window.Portfolio = Portfolio;
 window.balance = balance;
